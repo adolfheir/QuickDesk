@@ -1,10 +1,12 @@
 // Copyright 2026 QuickDesk Authors
 
 #include "HostManager.h"
+#include "ClipboardSync.h"
 #include "NativeMessaging.h"
 #include "core/localconfigcenter.h"
 #include "infra/env/applicationcontext.h"
 #include "infra/log/log.h"
+#include <QJsonDocument>
 #include <QJsonArray>
 
 namespace quickdesk {
@@ -704,7 +706,14 @@ void HostManager::handleSetAutoLockOnSessionEndResult(const QJsonObject& message
 
 void HostManager::handleSkillMessage(const QJsonObject& message)
 {
-    QString data = message["data"].toString();
+    const QString data = message.value("data").toString();
+    const auto document = QJsonDocument::fromJson(data.toUtf8());
+    if (ClipboardSync::isClipboardMessage(document.object())) {
+        if (!m_clients.isEmpty()) {
+            emit clipboardSyncMessage(document.object());
+        }
+        return;
+    }
     emit skillMessage(data);
 }
 

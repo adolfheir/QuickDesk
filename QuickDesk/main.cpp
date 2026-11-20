@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
         "HostManager is accessed through MainController");
     qmlRegisterUncreatableType<quickdesk::ClientManager>("QuickDesk", 1, 0, "ClientManager",
         "ClientManager is accessed through MainController");
+    qmlRegisterUncreatableType<quickdesk::ClipboardSync>("QuickDesk", 1, 0, "ClipboardSync",
+        "ClipboardSync is accessed through ClientManager");
     qmlRegisterUncreatableType<quickdesk::SharedMemoryManager>("QuickDesk", 1, 0, "SharedMemoryManager",
         "SharedMemoryManager is accessed through ClientManager");
     qmlRegisterType<quickdesk::VideoFrameProvider>("QuickDesk", 1, 0, "VideoFrameProvider");

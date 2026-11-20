@@ -183,6 +183,18 @@
 <context>
     <name>FloatingToolButton</name>
     <message>
+        <source>Send Local Clipboard</source>
+        <translation>发送本机剪贴板</translation>
+    </message>
+    <message>
+        <source>Receive Remote Clipboard</source>
+        <translation>接收远端剪贴板</translation>
+    </message>
+    <message>
+        <source>Syncing clipboard…</source>
+        <translation>正在同步剪贴板…</translation>
+    </message>
+    <message>
         <location filename="../../qml/quickdeskcomponent/FloatingToolButton.qml" line="244"/>
         <source>Displays</source>
         <translation>显示器</translation>
@@ -2228,6 +2240,65 @@ Access Code: %2</source>
         <location filename="../../src/component/SystemTrayManager.cpp" line="67"/>
         <source>QuickDesk is still running in the background.</source>
         <translation>QuickDesk始终在后台运行。</translation>
+    </message>
+</context>
+<context>
+    <name>quickdesk::ClipboardSync</name>
+    <message>
+        <source>Clipboard sent to the remote device.</source>
+        <translation>已发送到远端剪贴板，可以在远端粘贴。</translation>
+    </message>
+    <message>
+        <source>Remote clipboard copied to this device.</source>
+        <translation>已复制到本机剪贴板，可以在本机粘贴。</translation>
+    </message>
+    <message>
+        <source>The local clipboard is empty.</source>
+        <translation>本机剪贴板为空。</translation>
+    </message>
+    <message>
+        <source>The remote clipboard is empty.</source>
+        <translation>远端剪贴板为空。</translation>
+    </message>
+    <message>
+        <source>Use file transfer for files copied from a file manager.</source>
+        <translation>从文件管理器复制的文件请使用文件传输。</translation>
+    </message>
+    <message>
+        <source>Clipboard content is too large (16 MiB or 32 megapixels max).</source>
+        <translation>剪贴板内容过大，最多支持 16 MiB 或 3200 万像素。</translation>
+    </message>
+    <message>
+        <source>The clipboard contains no supported text or image.</source>
+        <translation>剪贴板中没有可同步的文字或图片。</translation>
+    </message>
+    <message>
+        <source>Could not read the source clipboard.</source>
+        <translation>无法读取来源端的剪贴板。</translation>
+    </message>
+    <message>
+        <source>Could not write to the destination clipboard.</source>
+        <translation>无法写入目标端的剪贴板。</translation>
+    </message>
+    <message>
+        <source>A clipboard sync is already in progress.</source>
+        <translation>剪贴板正在同步。</translation>
+    </message>
+    <message>
+        <source>Clipboard sync requires an active connection.</source>
+        <translation>请先连接远端设备，再同步剪贴板。</translation>
+    </message>
+    <message>
+        <source>Clipboard sync received no response. Check that both QuickDesk apps are updated.</source>
+        <translation>远端没有响应，请确认两端的 QuickDesk 均已更新。</translation>
+    </message>
+    <message>
+        <source>Clipboard sync timed out. Please try again.</source>
+        <translation>剪贴板同步超时，请重试。</translation>
+    </message>
+    <message>
+        <source>Clipboard sync failed. Please try again.</source>
+        <translation>剪贴板同步失败，请重试。</translation>
     </message>
 </context>
 </TS>

@@ -4,6 +4,8 @@ include(quickdesk-remoting)
 
 include(rapidocr)
 
+include(monocypher)
+
 add_subdirectory(base)
 add_subdirectory(infra)
 
@@ -16,6 +18,7 @@ set(MANAGER_SOURCES
     src/manager/HostManager.cpp
     src/manager/FileTransferQueue.cpp
     src/manager/ClientManager.cpp
+    src/manager/ClipboardSync.cpp
     src/manager/DeviceRecorder.cpp
     src/manager/SharedMemoryManager.cpp
     src/manager/RemoteDeviceManager.cpp
@@ -32,6 +35,7 @@ set(MANAGER_HEADERS
     src/manager/TurnServerManager.h
     src/manager/HostManager.h
     src/manager/ClipboardFiles.h
+    src/manager/ClipboardSync.h
     src/manager/FileTransferQueue.h
     src/manager/ClientManager.h
     src/manager/SharedMemoryManager.h
@@ -293,6 +297,7 @@ target_link_libraries(QuickDesk
     Qt6::Multimedia
     Qt6::Network
     Qt6::WebSockets
+    qd_monocypher
     base
     infra
 )

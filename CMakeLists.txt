@@ -13,7 +13,7 @@ file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/version QD_FILE_VERSION)
 # project通常指的是逻辑上相对独立、完整，能够独立编译的集合
 # 一个project可以单独设置名称、版本和语言
 # 一般你的项目中某一部分需要有独立的名称/版本/不同的语言，那么就可以放到单独的project中
-project(QuickDesk VERSION ${QD_FILE_VERSION} LANGUAGES CXX)
+project(QuickDesk VERSION ${QD_FILE_VERSION} LANGUAGES C CXX)
 
 message(STATUS "QD_FILE_VERSION:${QD_FILE_VERSION}, CMAKE_PROJECT_VERSION:${CMAKE_PROJECT_VERSION}")
 

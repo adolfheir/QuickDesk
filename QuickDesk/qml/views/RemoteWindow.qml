@@ -1081,6 +1081,14 @@ Window {
         }
     }
 
+    Connections {
+        target: sessionTools.systemClipboard || null
+        function onFinished(deviceId, message, success) {
+            const deviceLabel = deviceId !== sessionTools.deviceId ? deviceId + ": " : ""
+            toast.show(deviceLabel + message, success ? QDToast.Type.Success : QDToast.Type.Error)
+        }
+    }
+
     // File Transfer Drawer (right side panel)
     QDDrawer {
         id: fileTransferDrawer

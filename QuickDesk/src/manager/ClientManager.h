@@ -19,6 +19,7 @@
 
 #include "SharedMemoryManager.h"
 #include "FileTransferQueue.h"
+#include "ClipboardSync.h"
 #include "common/ProcessStatus.h"
 
 namespace quickdesk {
@@ -66,6 +67,7 @@ class ClientManager : public QObject {
     Q_PROPERTY(bool keyboardCaptureSupported READ keyboardCaptureSupported NOTIFY keyboardCaptureChanged)
     Q_PROPERTY(QString keyboardCaptureDevice READ keyboardCaptureDevice NOTIFY keyboardCaptureChanged)
     Q_PROPERTY(bool keyboardCaptureActive READ keyboardCaptureActive NOTIFY keyboardCaptureChanged)
+    Q_PROPERTY(ClipboardSync* systemClipboard READ systemClipboard CONSTANT)
     Q_PROPERTY(QVariantList fileTransferTasks READ fileTransferTasks NOTIFY fileTransferTasksChanged)
     Q_PROPERTY(int connectionCount READ connectionCount NOTIFY connectionCountChanged)
     Q_PROPERTY(QString activeDeviceId READ activeDeviceId
@@ -111,6 +113,8 @@ public:
 
     // Clipboard
     Q_INVOKABLE void syncClipboard(const QString& deviceId, const QString& text);
+    Q_INVOKABLE void syncSystemClipboard(const QString& deviceId, bool send);
+    ClipboardSync* systemClipboard() { return &m_systemClipboard; }
 
     // Skill bridge
     Q_INVOKABLE void sendSkillCommand(const QString& deviceId,
@@ -286,6 +290,7 @@ private:
     int m_captureGeneration = 0;
     void handleCapturedKeyboardEvent(const QJsonObject& message);
     void handleKeyboardCaptureState(const QJsonObject& message);
+    ClipboardSync m_systemClipboard;
     FileTransferQueue m_fileTransfers;
     bool fileTransferReady(const QString& deviceId) const;
     QPointer<NativeMessaging> m_messaging;

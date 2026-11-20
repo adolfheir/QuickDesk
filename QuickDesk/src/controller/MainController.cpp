@@ -82,6 +82,23 @@ MainController::MainController(QObject* parent)
     m_skillHostManager = std::make_unique<SkillHostManager>(this);
     m_skillHostManager->setHostManager(m_hostManager.get());
 
+    auto* clipboard = m_clientManager->systemClipboard();
+    connect(m_hostManager.get(), &HostManager::clipboardSyncMessage,
+            clipboard, &ClipboardSync::onControllerMessage);
+    connect(m_hostManager.get(), &HostManager::clientDisconnected,
+            clipboard, &ClipboardSync::cancelHost);
+    connect(m_hostManager.get(), &HostManager::clientCountChanged, clipboard, [this, clipboard] {
+        if (m_hostManager->clientCount() == 0) {
+            clipboard->cancelHost();
+        }
+    });
+    connect(clipboard, &ClipboardSync::sendToController, m_hostManager.get(),
+            [this](const QJsonObject& message) {
+        if (m_hostManager->clientCount() > 0) {
+            m_hostManager->sendSkillBridgeSend(QString::fromUtf8(QJsonDocument(message).toJson(QJsonDocument::Compact)));
+        }
+    }, Qt::QueuedConnection);
+
     // Connect ProcessManager signals
     connect(m_processManager.get(), &ProcessManager::hostProcessStarted,
             this, &MainController::onHostProcessStarted);

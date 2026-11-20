@@ -139,6 +139,7 @@ signals:
 
     // Skill bridge — forwarded from Chromium host to SkillHostManager
     void skillMessage(const QString& jsonData);
+    void clipboardSyncMessage(const QJsonObject& message);
 
 private slots:
     void onMessageReceived(const QJsonObject& message);

@@ -9,6 +9,7 @@ Item {
     // Properties
     property string deviceId: ""
     property var clientManager: null
+    readonly property var systemClipboard: clientManager ? clientManager.systemClipboard : null
     property var desktopView: null
     property var videoInfo: null  // Video info including original resolution
     property bool miniMapEnabled: true
@@ -62,6 +63,11 @@ Item {
     signal showTransferPanelRequested()
     signal miniMapEnabledRequested(bool enabled)
     
+    function syncClipboard(send) {
+        root.showToast(qsTr("Syncing clipboard…"), QDToast.Type.Info)
+        root.clientManager.syncSystemClipboard(root.deviceId, send)
+    }
+
     // Apply framerate boost mode
     function applyFramerateBoostMode(mode) {
         if (!clientManager || !deviceId) {
@@ -676,7 +682,23 @@ Item {
         }
 
         QDMenuSeparator {
-            visible: root.supportsFileTransfer
+            visible: !!root.systemClipboard || root.supportsFileTransfer
+        }
+
+        QDMenuItem {
+            visible: !!root.systemClipboard
+            enabled: !!root.deviceId && !!root.systemClipboard && !root.systemClipboard.busy
+            text: qsTr("Send Local Clipboard")
+            iconText: FluentIconGlyph.copyGlyph
+            onTriggered: root.syncClipboard(true)
+        }
+
+        QDMenuItem {
+            visible: !!root.systemClipboard
+            enabled: !!root.deviceId && !!root.systemClipboard && !root.systemClipboard.busy
+            text: qsTr("Receive Remote Clipboard")
+            iconText: FluentIconGlyph.pasteGlyph
+            onTriggered: root.syncClipboard(false)
         }
 
         QDMenuItem {

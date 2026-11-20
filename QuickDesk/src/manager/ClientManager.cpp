@@ -28,6 +28,13 @@ ClientManager::ClientManager(QObject* parent)
     : QObject(parent)
     , m_sharedMemoryManager(std::make_unique<SharedMemoryManager>(this))
 {
+    connect(&m_systemClipboard, &ClipboardSync::sendToRemote, this,
+            [this](const QString& connectionId, const QJsonObject& message) {
+        const QString deviceId = findDeviceId(connectionId);
+        if (!deviceId.isEmpty() && getConnectionRtcState(deviceId) == RtcStatus::Connected) {
+            sendSkillCommand(deviceId, QString::fromUtf8(QJsonDocument(message).toJson(QJsonDocument::Compact)));
+        }
+    }, Qt::QueuedConnection);
     connect(&m_fileTransfers, &FileTransferQueue::changed,
             this, &ClientManager::fileTransferTasksChanged);
     connect(&m_fileTransfers, &FileTransferQueue::notice,
@@ -46,6 +53,9 @@ ClientManager::ClientManager(QObject* parent)
     connect(this, &ClientManager::connectionStateChanged, this,
             [this](const QString& deviceId, const QString& state, const QJsonObject&) {
         const QString id = connectionIdFor(deviceId);
+        if (!id.isEmpty() && state != "connected") {
+            m_systemClipboard.cancelClient(id);
+        }
         m_fileTransfers.reconcileSession(id, deviceId, state == "connected",
                                          state == "disconnected" || state == "failed");
     });
@@ -58,6 +68,7 @@ void ClientManager::setMessaging(NativeMessaging* messaging)
         m_keyboardCaptureSupported = false;
         emit keyboardCaptureChanged();
         m_fileTransfers.endAllSessions();
+        m_systemClipboard.cancelClient();
     }
     if (m_messaging) {
         QObject::disconnect(m_messaging, nullptr, this, nullptr);
@@ -309,6 +320,13 @@ void ClientManager::syncClipboard(const QString& deviceId, const QString& text)
     message["connectionId"] = connId;
     message["text"] = text;
     m_messaging->sendMessage(message);
+}
+
+void ClientManager::syncSystemClipboard(const QString& deviceId, bool send)
+{
+    const bool ready = m_messaging && m_messaging->isReady()
+        && getConnectionRtcState(deviceId) == RtcStatus::Connected;
+    m_systemClipboard.start(deviceId, ready ? connectionIdFor(deviceId) : QString(), send);
 }
 
 void ClientManager::sendSkillCommand(const QString& deviceId,
@@ -929,7 +947,11 @@ QString ClientManager::generateConnectionId()
 void ClientManager::removeConnection(const QString& deviceId)
 {
     if (deviceId == m_captureDevice) setKeyboardCapture(deviceId, nullptr, false);
-    m_fileTransfers.endSession(connectionIdFor(deviceId));
+    const QString connectionId = connectionIdFor(deviceId);
+    if (!connectionId.isEmpty()) {
+        m_systemClipboard.cancelClient(connectionId);
+    }
+    m_fileTransfers.endSession(connectionId);
     auto it = m_connections.find(deviceId);
     if (it != m_connections.end()) {
         m_connIdToDeviceId.remove(it->connectionId);
@@ -1067,9 +1089,13 @@ void ClientManager::handleConnectionListChanged(const QJsonObject& message)
     }
 
     for (const auto& old : oldConnections) {
-        if (!m_connections.contains(old.deviceId) ||
-            m_connections.value(old.deviceId).connectionId != old.connectionId)
+        const auto current = m_connections.constFind(old.deviceId);
+        if (current == m_connections.cend() || current->connectionId != old.connectionId) {
             m_fileTransfers.endSession(old.connectionId);
+            m_systemClipboard.cancelClient(old.connectionId);
+        } else if (current->rtcState != RtcStatus::Connected) {
+            m_systemClipboard.cancelClient(old.connectionId);
+        }
     }
     for (const auto& current : m_connections)
         m_fileTransfers.reconcileSession(current.connectionId, current.deviceId,
@@ -1616,6 +1642,12 @@ void ClientManager::handleSkillBridgeResponse(const QJsonObject& message)
     QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
     QJsonObject response = doc.isObject() ? doc.object() : QJsonObject{{"raw", data}};
 
+    if (ClipboardSync::isClipboardMessage(response)) {
+        if (getConnectionRtcState(deviceId) == RtcStatus::Connected) {
+            m_systemClipboard.onRemoteMessage(connId, response);
+        }
+        return;
+    }
     emit skillBridgeResponseReceived(deviceId, response);
 }
 
